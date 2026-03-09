@@ -1,0 +1,62 @@
+{
+  "app_name": "Jisr",
+  "onboarding": {
+    "welcome": "Bienvenue sur Jisr",
+    "subtitle": "Messagerie hors-ligne pour le Liban",
+    "choose_language": "Choisissez votre langue",
+    "enter_name": "Entrez votre nom d'affichage",
+    "name_placeholder": "Votre nom",
+    "generating_keys": "Génération des clés de chiffrement...",
+    "ready": "Vous êtes prêt !",
+    "start": "Commencer à discuter"
+  },
+  "contacts": {
+    "title": "Contacts",
+    "no_contacts": "Aucun contact pour le moment",
+    "add_contact": "Ajouter un contact",
+    "search": "Rechercher des contacts..."
+  },
+  "chat": {
+    "placeholder": "Tapez un message...",
+    "send": "Envoyer",
+    "delivered": "Remis",
+    "sent": "Envoyé",
+    "pending": "Envoi en cours...",
+    "read": "Lu",
+    "encryption_notice": "Les messages sont chiffrés de bout en bout"
+  },
+  "add_contact": {
+    "title": "Ajouter un contact",
+    "show_qr": "Afficher mon code QR",
+    "scan_qr": "Scanner un code QR",
+    "scan_instruction": "Scannez le code QR de votre contact",
+    "contact_added": "Contact ajouté !",
+    "invalid_qr": "Code QR invalide"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "display_name": "Nom d'affichage",
+    "language": "Langue",
+    "public_key": "Votre clé publique",
+    "nostr_relays": "Relais Nostr",
+    "clear_data": "Effacer toutes les données",
+    "version": "Version",
+    "about": "À propos de Jisr",
+    "about_text": "Jisr (Pont) est une application de messagerie en réseau maillé conçue pour le Liban. Elle fonctionne sans Internet grâce au Bluetooth, et se connecte à Nostr lorsqu'une connexion est disponible."
+  },
+  "connection": {
+    "direct": "Direct",
+    "mesh": "Maillé",
+    "nostr": "Nostr",
+    "offline": "Hors-ligne",
+    "peers_nearby": "{{count}} appareils à proximité"
+  },
+  "common": {
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "error": "Erreur",
+    "ok": "OK"
+  }
+}

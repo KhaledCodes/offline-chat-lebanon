@@ -1,0 +1,62 @@
+{
+  "app_name": "Jisr",
+  "onboarding": {
+    "welcome": "Welcome to Jisr",
+    "subtitle": "Offline-first messaging for Lebanon",
+    "choose_language": "Choose your language",
+    "enter_name": "Enter your display name",
+    "name_placeholder": "Your name",
+    "generating_keys": "Generating encryption keys...",
+    "ready": "You're all set!",
+    "start": "Start Messaging"
+  },
+  "contacts": {
+    "title": "Contacts",
+    "no_contacts": "No contacts yet",
+    "add_contact": "Add Contact",
+    "search": "Search contacts..."
+  },
+  "chat": {
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "delivered": "Delivered",
+    "sent": "Sent",
+    "pending": "Sending...",
+    "read": "Read",
+    "encryption_notice": "Messages are end-to-end encrypted"
+  },
+  "add_contact": {
+    "title": "Add Contact",
+    "show_qr": "Show My QR Code",
+    "scan_qr": "Scan QR Code",
+    "scan_instruction": "Scan your contact's QR code",
+    "contact_added": "Contact added!",
+    "invalid_qr": "Invalid QR code"
+  },
+  "settings": {
+    "title": "Settings",
+    "display_name": "Display Name",
+    "language": "Language",
+    "public_key": "Your Public Key",
+    "nostr_relays": "Nostr Relays",
+    "clear_data": "Clear All Data",
+    "version": "Version",
+    "about": "About Jisr",
+    "about_text": "Jisr (Bridge) is an offline-first mesh messaging app designed for Lebanon. It works without internet using Bluetooth, and bridges to Nostr when online."
+  },
+  "connection": {
+    "direct": "Direct",
+    "mesh": "Mesh",
+    "nostr": "Nostr",
+    "offline": "Offline",
+    "peers_nearby": "{{count}} peers nearby"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "error": "Error",
+    "ok": "OK"
+  }
+}

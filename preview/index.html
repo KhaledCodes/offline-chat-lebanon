@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jisr - Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #1C1C1E;
+  }
+
+  /* Phone frame */
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: #fff;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    position: relative;
+    border: 8px solid #1a1a2e;
+  }
+  .phone-inner {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 50px;
+    background: #fff;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 24px 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .status-bar-time { font-size: 15px; font-weight: 600; }
+  .status-bar-icons { display: flex; gap: 4px; font-size: 12px; }
+
+  /* Screen container */
+  .screen { display: none; width: 100%; height: 100%; flex-direction: column; position: absolute; top: 0; left: 0; }
+  .screen.active { display: flex; }
+
+  /* Navigation bar */
+  .nav-bar {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    background: #fff;
+    border-bottom: 0.5px solid #E5E5EA;
+    flex-shrink: 0;
+  }
+  .nav-back { color: #007AFF; font-size: 17px; cursor: pointer; display: flex; align-items: center; gap: 4px; background: none; border: none; font-family: inherit; }
+  .nav-back:hover { opacity: 0.7; }
+  .nav-title { font-size: 17px; font-weight: 600; color: #1C1C1E; }
+  .nav-right { display: flex; align-items: center; gap: 8px; }
+
+  /* --- ONBOARDING SCREEN --- */
+  .onboarding {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: #fff;
+  }
+  .arabic-title { font-size: 56px; font-weight: 300; color: #007AFF; margin-bottom: 2px; }
+  .latin-title { font-size: 18px; font-weight: 600; color: #8E8E93; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 40px; }
+  .step-title { font-size: 22px; font-weight: 600; color: #1C1C1E; margin-bottom: 24px; text-align: center; }
+  .lang-list { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+  .lang-btn {
+    display: flex; align-items: center; padding: 16px 20px; background: #F2F2F7;
+    border-radius: 14px; gap: 16px; cursor: pointer; border: none; width: 100%;
+    font-family: inherit; text-align: left; transition: transform 0.1s;
+  }
+  .lang-btn:active { transform: scale(0.98); }
+  .lang-flag { font-size: 32px; }
+  .lang-native { font-size: 18px; font-weight: 600; color: #1C1C1E; }
+  .lang-english { font-size: 14px; color: #8E8E93; margin-top: 2px; }
+  .name-input {
+    width: 100%; font-size: 18px; color: #1C1C1E; border: none; border-bottom: 2px solid #007AFF;
+    padding: 12px 0; margin-bottom: 32px; text-align: center; outline: none; background: transparent;
+  }
+  .name-input::placeholder { color: #8E8E93; }
+  .primary-btn {
+    background: #007AFF; padding: 14px 48px; border-radius: 14px; min-width: 200px;
+    text-align: center; cursor: pointer; border: none; font-family: inherit; transition: transform 0.1s;
+  }
+  .primary-btn:active { transform: scale(0.97); }
+  .primary-btn:disabled { background: #C7C7CC; cursor: default; }
+  .primary-btn-text { font-size: 17px; font-weight: 600; color: #fff; }
+  .keygen-spinner { width: 40px; height: 40px; border: 3px solid #E5E5EA; border-top-color: #007AFF; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .keygen-text { font-size: 16px; color: #8E8E93; }
+  .ready-icon { font-size: 64px; margin-bottom: 16px; }
+  .ready-title { font-size: 26px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px; }
+  .ready-subtitle { font-size: 16px; color: #8E8E93; text-align: center; margin-bottom: 40px; line-height: 1.5; }
+  .step-dots { display: flex; gap: 8px; position: absolute; bottom: 48px; }
+  .dot { width: 8px; height: 8px; border-radius: 4px; background: #D1D1D6; transition: all 0.3s; }
+  .dot.active { background: #007AFF; width: 24px; }
+
+  /* Onboarding step containers */
+  .onboarding-step { display: none; flex-direction: column; align-items: center; width: 100%; animation: fadeIn 0.3s ease; }
+  .onboarding-step.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* --- CONTACT LIST SCREEN --- */
+  .contact-list-body { flex: 1; overflow-y: auto; background: #fff; }
+  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; min-height: 500px; }
+  .empty-icon { font-size: 64px; margin-bottom: 16px; }
+  .empty-title { font-size: 22px; font-weight: 600; color: #1C1C1E; margin-bottom: 8px; }
+  .empty-subtitle { font-size: 15px; color: #8E8E93; text-align: center; margin-bottom: 32px; line-height: 1.5; }
+  .empty-btn { background: #007AFF; padding: 12px 32px; border-radius: 12px; border: none; cursor: pointer; font-family: inherit; }
+  .empty-btn-text { font-size: 16px; font-weight: 600; color: #fff; }
+
+  .contact-row {
+    display: flex; align-items: center; padding: 12px 16px; gap: 12px;
+    cursor: pointer; transition: background 0.1s; border: none; background: none; width: 100%; font-family: inherit; text-align: left;
+  }
+  .contact-row:active { background: #F2F2F7; }
+  .avatar { width: 50px; height: 50px; border-radius: 25px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .avatar-text { font-size: 18px; font-weight: 600; color: #fff; }
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-top { display: flex; justify-content: space-between; align-items: center; }
+  .contact-name { font-size: 16px; font-weight: 600; color: #1C1C1E; }
+  .contact-time { font-size: 13px; color: #8E8E93; }
+  .last-msg { font-size: 14px; color: #8E8E93; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .unread { background: #007AFF; border-radius: 10px; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; padding: 0 6px; flex-shrink: 0; }
+  .unread-text { font-size: 12px; font-weight: 700; color: #fff; }
+  .contact-separator { height: 0.5px; background: #E5E5EA; margin-left: 78px; }
+  .fab {
+    position: absolute; right: 20px; bottom: 30px; width: 56px; height: 56px;
+    border-radius: 28px; background: #007AFF; display: flex; align-items: center;
+    justify-content: center; cursor: pointer; border: none;
+    box-shadow: 0 4px 12px rgba(0,122,255,0.35); transition: transform 0.1s;
+  }
+  .fab:active { transform: scale(0.93); }
+  .fab-icon { font-size: 28px; color: #fff; font-weight: 300; margin-top: -1px; }
+
+  /* Connection badge */
+  .conn-badge { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #8E8E93; }
+  .conn-dot { width: 6px; height: 6px; border-radius: 3px; }
+  .conn-dot.offline { background: #FF3B30; }
+  .conn-dot.direct { background: #34C759; }
+
+  /* --- CHAT SCREEN --- */
+  .chat-body { flex: 1; display: flex; flex-direction: column; background: #fff; }
+  .messages-area { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .encryption-notice {
+    text-align: center; font-size: 12px; color: #8E8E93; background: #F2F2F7;
+    padding: 8px 16px; border-radius: 16px; margin: 8px auto 16px; display: inline-block; align-self: center;
+  }
+  .encryption-notice::before { content: "\1F512 "; }
+  .msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 18px; font-size: 16px; line-height: 1.4; }
+  .msg-sent { background: #007AFF; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .msg-received { background: #E9E9EB; color: #1C1C1E; align-self: flex-start; border-bottom-left-radius: 4px; }
+  .msg-time { font-size: 11px; margin-top: 4px; opacity: 0.7; }
+  .msg-time-sent { text-align: right; color: rgba(255,255,255,0.7); }
+  .msg-time-received { color: #8E8E93; }
+  .msg-status { font-size: 10px; }
+
+  .input-bar {
+    display: flex; align-items: flex-end; padding: 8px 12px; gap: 8px;
+    border-top: 0.5px solid #E5E5EA; background: #fff; flex-shrink: 0;
+  }
+  .msg-input {
+    flex: 1; border: 1px solid #E5E5EA; border-radius: 20px; padding: 8px 16px;
+    font-size: 16px; outline: none; resize: none; font-family: inherit;
+    max-height: 80px; min-height: 36px; line-height: 1.3;
+  }
+  .msg-input::placeholder { color: #8E8E93; }
+  .send-btn {
+    width: 32px; height: 32px; border-radius: 16px; background: #007AFF;
+    border: none; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; transition: transform 0.1s;
+  }
+  .send-btn:active { transform: scale(0.9); }
+  .send-btn:disabled { background: #C7C7CC; cursor: default; }
+  .send-arrow { color: #fff; font-size: 18px; font-weight: bold; transform: rotate(-90deg); }
+
+  /* --- ADD CONTACT SCREEN --- */
+  .add-contact-body { flex: 1; display: flex; flex-direction: column; background: #fff; }
+  .tab-bar {
+    display: flex; margin: 12px 16px; background: #F2F2F7; border-radius: 10px;
+    padding: 2px; position: relative; flex-shrink: 0;
+  }
+  .tab-indicator {
+    position: absolute; top: 2px; bottom: 2px; width: 50%; background: #fff;
+    border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: left 0.3s ease;
+  }
+  .tab-indicator.show { left: 2px; }
+  .tab-indicator.scan { left: 50%; }
+  .tab {
+    flex: 1; padding: 10px; text-align: center; cursor: pointer; z-index: 1;
+    font-size: 14px; font-weight: 500; color: #8E8E93; border: none;
+    background: transparent; font-family: inherit; transition: all 0.2s;
+  }
+  .tab.active { color: #1C1C1E; font-weight: 600; }
+  .tab-content { flex: 1; display: flex; align-items: center; justify-content: center; }
+  .qr-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  .qr-box {
+    width: 240px; height: 240px; background: #F8F8F8; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center; position: relative;
+    border: 1px solid #E5E5EA;
+  }
+  .qr-pattern {
+    width: 200px; height: 200px; display: grid; grid-template-columns: repeat(21,1fr);
+    gap: 0; opacity: 0.8;
+  }
+  .qr-cell { aspect-ratio: 1; }
+  .qr-cell.dark { background: #1C1C1E; }
+  .qr-cell.light { background: #fff; }
+  .qr-logo {
+    position: absolute; background: #fff; padding: 4px 8px; border-radius: 6px;
+    font-size: 18px; color: #007AFF; font-weight: 600;
+  }
+  .qr-name { font-size: 22px; font-weight: 600; color: #1C1C1E; }
+  .qr-hint { font-size: 14px; color: #8E8E93; }
+  .camera-placeholder {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; background: #1a1a1a; margin: 16px; border-radius: 16px; gap: 16px;
+  }
+  .scan-frame { width: 200px; height: 200px; border: 2px solid rgba(255,255,255,0.6); border-radius: 16px; }
+  .scan-text { color: rgba(255,255,255,0.8); font-size: 16px; font-weight: 500; }
+
+  /* --- SETTINGS SCREEN --- */
+  .settings-body { flex: 1; overflow-y: auto; background: #F2F2F7; }
+  .settings-content { padding-top: 16px; padding-bottom: 40px; }
+  .section-header { font-size: 13px; color: #6C6C70; margin: 24px 16px 6px; letter-spacing: 0.5px; }
+  .section-header:first-child { margin-top: 8px; }
+  .section { background: #fff; margin: 0 16px; border-radius: 10px; overflow: hidden; }
+  .setting-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 13px 16px; min-height: 44px; cursor: pointer; border: none;
+    background: none; width: 100%; font-family: inherit; text-align: left;
+  }
+  .setting-row:active { background: #F2F2F7; }
+  .setting-label { font-size: 16px; color: #1C1C1E; }
+  .setting-value { font-size: 16px; color: #8E8E93; }
+  .setting-value-mono { font-size: 13px; color: #8E8E93; font-family: monospace; }
+  .row-sep { height: 0.5px; background: #C6C6C8; margin-left: 16px; }
+  .about-text { font-size: 14px; color: #6C6C70; line-height: 1.5; padding: 13px 16px; }
+  .relay-row { padding: 13px 16px; }
+  .relay-text { font-size: 13px; color: #8E8E93; font-family: monospace; }
+  .danger-section { margin-top: 40px; }
+  .danger-row { padding: 13px 16px; text-align: center; cursor: pointer; }
+  .danger-text { font-size: 16px; font-weight: 500; color: #FF3B30; }
+  .lang-picker { border-top: 0.5px solid #C6C6C8; }
+  .lang-option {
+    display: flex; align-items: center; padding: 12px 16px; gap: 12px;
+    cursor: pointer; border: none; background: none; width: 100%; font-family: inherit; text-align: left;
+  }
+  .lang-option:active { background: #F2F2F7; }
+  .lang-option.selected { background: #F2F2F7; }
+  .lang-option-label { font-size: 16px; color: #1C1C1E; flex: 1; }
+  .checkmark { font-size: 16px; color: #007AFF; font-weight: 600; }
+
+  /* Nav header for chat */
+  .chat-header-center { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .chat-header-name { font-size: 16px; font-weight: 600; color: #1C1C1E; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+<div class="phone-inner">
+
+<!-- Status Bar (always visible) -->
+<div class="status-bar">
+  <span class="status-bar-time">9:41</span>
+  <span class="status-bar-icons">
+    <span>&#9679;&#9679;&#9679;&#9679;</span>
+    <span>&#128267;</span>
+  </span>
+</div>
+
+<!-- ====== SCREEN: ONBOARDING ====== -->
+<div class="screen active" id="screen-onboarding">
+  <div class="onboarding">
+    <div class="arabic-title">&#1580;&#1587;&#1585;</div>
+    <div class="latin-title">JISR</div>
+
+    <!-- Step 1: Language -->
+    <div class="onboarding-step active" id="step-language">
+      <div class="step-title">Choose your language</div>
+      <div class="lang-list">
+        <button class="lang-btn" onclick="goToStep('name')">
+          <span class="lang-flag">&#127473;&#127463;</span>
+          <div><div class="lang-native">&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</div><div class="lang-english">Arabic</div></div>
+        </button>
+        <button class="lang-btn" onclick="goToStep('name')">
+          <span class="lang-flag">&#127467;&#127479;</span>
+          <div><div class="lang-native">Fran&#231;ais</div><div class="lang-english">French</div></div>
+        </button>
+        <button class="lang-btn" onclick="goToStep('name')">
+          <span class="lang-flag">&#127468;&#127463;</span>
+          <div><div class="lang-native">English</div><div class="lang-english">English</div></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Name -->
+    <div class="onboarding-step" id="step-name">
+      <div class="step-title">Enter your display name</div>
+      <input class="name-input" id="name-input" type="text" placeholder="Your name" maxlength="40">
+      <button class="primary-btn" onclick="goToStep('keys')"><span class="primary-btn-text">Confirm</span></button>
+    </div>
+
+    <!-- Step 3: Key Gen -->
+    <div class="onboarding-step" id="step-keys">
+      <div class="keygen-spinner"></div>
+      <div class="keygen-text">Generating encryption keys...</div>
+    </div>
+
+    <!-- Step 4: Ready -->
+    <div class="onboarding-step" id="step-ready">
+      <div class="ready-icon">&#9989;</div>
+      <div class="ready-title">You're all set!</div>
+      <div class="ready-subtitle">Offline-first messaging for Lebanon</div>
+      <button class="primary-btn" onclick="showScreen('contacts')"><span class="primary-btn-text">Start Messaging</span></button>
+    </div>
+
+    <div class="step-dots">
+      <div class="dot active" id="dot-language"></div>
+      <div class="dot" id="dot-name"></div>
+      <div class="dot" id="dot-keys"></div>
+      <div class="dot" id="dot-ready"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCREEN: CONTACT LIST ====== -->
+<div class="screen" id="screen-contacts">
+  <div class="nav-bar">
+    <div class="nav-title">Contacts</div>
+    <div class="nav-right">
+      <div class="conn-badge"><div class="conn-dot offline"></div> Offline</div>
+      <button class="nav-back" onclick="showScreen('settings')" style="font-size:22px;">&#9881;&#65039;</button>
+    </div>
+  </div>
+  <div class="contact-list-body" id="contact-list-body">
+    <!-- Empty state (shown initially) -->
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">&#128225;</div>
+      <div class="empty-title">No contacts yet</div>
+      <div class="empty-subtitle">Offline-first messaging for Lebanon</div>
+      <button class="empty-btn" onclick="showScreen('add-contact')"><span class="empty-btn-text">Add Contact</span></button>
+    </div>
+    <!-- Contacts (shown after adding) -->
+    <div id="contacts-list" style="display:none;">
+      <button class="contact-row" onclick="showScreen('chat')">
+        <div class="avatar" style="background:#4ECDC4"><span class="avatar-text">SA</span></div>
+        <div class="contact-info">
+          <div class="contact-top"><span class="contact-name">Sami Assaf</span><span class="contact-time">2m</span></div>
+          <div class="last-msg">See you at the university!</div>
+        </div>
+        <div class="unread"><span class="unread-text">1</span></div>
+      </button>
+      <div class="contact-separator"></div>
+      <button class="contact-row" onclick="showScreen('chat')">
+        <div class="avatar" style="background:#FF6B6B"><span class="avatar-text">LK</span></div>
+        <div class="contact-info">
+          <div class="contact-top"><span class="contact-name">Layla Khoury</span><span class="contact-time">1h</span></div>
+          <div class="last-msg">The power is back in Hamra</div>
+        </div>
+      </button>
+      <div class="contact-separator"></div>
+      <button class="contact-row" onclick="showScreen('chat')">
+        <div class="avatar" style="background:#45B7D1"><span class="avatar-text">OH</span></div>
+        <div class="contact-info">
+          <div class="contact-top"><span class="contact-name">Omar Haddad</span><span class="contact-time">3h</span></div>
+          <div class="last-msg">Can you relay a message to Nour?</div>
+        </div>
+      </button>
+      <div class="contact-separator"></div>
+      <button class="contact-row" onclick="showScreen('chat')">
+        <div class="avatar" style="background:#96CEB4"><span class="avatar-text">NB</span></div>
+        <div class="contact-info">
+          <div class="contact-top"><span class="contact-name">Nour Bazzi</span><span class="contact-time">Yesterday</span></div>
+          <div class="last-msg">Thanks for the help!</div>
+        </div>
+      </button>
+      <div class="contact-separator"></div>
+      <button class="contact-row" onclick="showScreen('chat')">
+        <div class="avatar" style="background:#DDA0DD"><span class="avatar-text">RE</span></div>
+        <div class="contact-info">
+          <div class="contact-top"><span class="contact-name">Rami El-Amine</span><span class="contact-time">2d</span></div>
+          <div class="last-msg">Meeting at 4pm at AUB</div>
+        </div>
+      </button>
+    </div>
+  </div>
+  <button class="fab" onclick="showScreen('add-contact')"><span class="fab-icon">+</span></button>
+</div>
+
+<!-- ====== SCREEN: CHAT ====== -->
+<div class="screen" id="screen-chat">
+  <div class="nav-bar">
+    <button class="nav-back" onclick="showScreen('contacts')">&#8592; Back</button>
+    <div class="chat-header-center">
+      <div class="chat-header-name">Sami Assaf</div>
+      <div class="conn-badge"><div class="conn-dot direct"></div> Direct &middot; 3 peers nearby</div>
+    </div>
+    <div style="width:50px"></div>
+  </div>
+  <div class="chat-body">
+    <div class="messages-area" id="messages-area">
+      <div class="encryption-notice">Messages are end-to-end encrypted</div>
+      <div class="msg-bubble msg-received">Hey! Are you on campus today?<div class="msg-time msg-time-received">2:30 PM</div></div>
+      <div class="msg-bubble msg-sent">Yes, I'm at the library. Where are you?<div class="msg-time msg-time-sent">2:31 PM &check;&check;</div></div>
+      <div class="msg-bubble msg-received">Walking from Bliss Street. Power went out in Hamra again<div class="msg-time msg-time-received">2:32 PM</div></div>
+      <div class="msg-bubble msg-sent">Same here. Good thing we have Jisr!<div class="msg-time msg-time-sent">2:33 PM &check;&check;</div></div>
+      <div class="msg-bubble msg-received">Exactly! I'll be there in 10 minutes<div class="msg-time msg-time-received">2:34 PM</div></div>
+      <div class="msg-bubble msg-sent">Perfect. I'm near the main gate<div class="msg-time msg-time-sent">2:35 PM &check;</div></div>
+      <div class="msg-bubble msg-received">See you at the university!<div class="msg-time msg-time-received">2:36 PM</div></div>
+    </div>
+    <div class="input-bar">
+      <input class="msg-input" id="msg-input" placeholder="Type a message..." oninput="toggleSendBtn()">
+      <button class="send-btn" id="send-btn" disabled onclick="sendMessage()"><span class="send-arrow">&#10095;</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCREEN: ADD CONTACT ====== -->
+<div class="screen" id="screen-add-contact">
+  <div class="nav-bar">
+    <button class="nav-back" onclick="showScreen('contacts')">&#8592; Back</button>
+    <div class="nav-title">Add Contact</div>
+    <div style="width:50px"></div>
+  </div>
+  <div class="add-contact-body">
+    <div class="tab-bar">
+      <div class="tab-indicator show" id="tab-indicator"></div>
+      <button class="tab active" id="tab-show" onclick="switchAddTab('show')">Show My QR Code</button>
+      <button class="tab" id="tab-scan" onclick="switchAddTab('scan')">Scan QR Code</button>
+    </div>
+    <div class="tab-content">
+      <!-- Show QR tab -->
+      <div id="tab-content-show">
+        <div class="qr-container">
+          <div class="qr-box">
+            <svg width="200" height="200" viewBox="0 0 200 200">
+              <!-- Simplified QR code pattern -->
+              <rect width="200" height="200" fill="white"/>
+              <!-- Finder patterns -->
+              <rect x="10" y="10" width="50" height="50" fill="#1C1C1E"/>
+              <rect x="15" y="15" width="40" height="40" fill="white"/>
+              <rect x="20" y="20" width="30" height="30" fill="#1C1C1E"/>
+              <rect x="140" y="10" width="50" height="50" fill="#1C1C1E"/>
+              <rect x="145" y="15" width="40" height="40" fill="white"/>
+              <rect x="150" y="20" width="30" height="30" fill="#1C1C1E"/>
+              <rect x="10" y="140" width="50" height="50" fill="#1C1C1E"/>
+              <rect x="15" y="145" width="40" height="40" fill="white"/>
+              <rect x="20" y="150" width="30" height="30" fill="#1C1C1E"/>
+              <!-- Data cells -->
+              <rect x="70" y="10" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="86" y="10" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="102" y="10" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="70" y="26" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="78" y="26" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="110" y="26" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="118" y="26" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="70" y="42" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="94" y="42" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="126" y="42" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="10" y="70" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="26" y="70" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="50" y="70" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="70" y="70" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="86" y="70" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="110" y="70" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="134" y="70" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="158" y="70" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="182" y="70" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="10" y="86" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="34" y="86" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="58" y="86" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="78" y="86" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="102" y="86" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="126" y="86" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="142" y="86" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="166" y="86" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="182" y="86" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="18" y="102" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="42" y="102" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="70" y="102" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="94" y="102" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="118" y="102" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="150" y="102" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="174" y="102" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="70" y="118" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="86" y="118" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="110" y="118" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="142" y="118" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="166" y="118" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="182" y="118" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="70" y="134" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="94" y="134" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="126" y="134" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="150" y="134" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="174" y="134" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="142" y="150" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="158" y="150" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="182" y="150" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="142" y="166" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="166" y="166" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="150" y="182" width="8" height="8" fill="#1C1C1E"/>
+              <rect x="174" y="182" width="8" height="8" fill="#1C1C1E"/>
+            </svg>
+            <div class="qr-logo">&#1580;&#1587;&#1585;</div>
+          </div>
+          <div class="qr-name" id="qr-display-name">You</div>
+          <div class="qr-hint">&#128241; Share this QR code to add contacts</div>
+        </div>
+      </div>
+      <!-- Scan QR tab -->
+      <div id="tab-content-scan" style="display:none; width:100%; flex:1;">
+        <div class="camera-placeholder">
+          <div class="scan-frame"></div>
+          <div class="scan-text">Scan your contact's QR code</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SCREEN: SETTINGS ====== -->
+<div class="screen" id="screen-settings">
+  <div class="nav-bar">
+    <button class="nav-back" onclick="showScreen('contacts')">&#8592; Back</button>
+    <div class="nav-title">Settings</div>
+    <div style="width:50px"></div>
+  </div>
+  <div class="settings-body">
+    <div class="settings-content">
+      <div class="section-header">DISPLAY NAME</div>
+      <div class="section">
+        <button class="setting-row">
+          <span class="setting-label">Display Name</span>
+          <span class="setting-value" id="settings-name">You</span>
+        </button>
+        <div class="row-sep"></div>
+        <button class="setting-row" onclick="alert('Public key copied to clipboard!')">
+          <span class="setting-label">Your Public Key</span>
+          <span class="setting-value-mono">a8Kf3mQ1...x9pLw2</span>
+        </button>
+      </div>
+
+      <div class="section-header">LANGUAGE</div>
+      <div class="section">
+        <button class="setting-row" id="lang-toggle" onclick="toggleLangPicker()">
+          <span class="setting-label">Language</span>
+          <span class="setting-value">&#127468;&#127463; English</span>
+        </button>
+        <div class="lang-picker" id="lang-picker" style="display:none;">
+          <button class="lang-option" onclick="selectLang(this, '&#127473;&#127463; &#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;')">
+            <span style="font-size:22px">&#127473;&#127463;</span>
+            <span class="lang-option-label">&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</span>
+          </button>
+          <button class="lang-option" onclick="selectLang(this, '&#127467;&#127479; Fran&#231;ais')">
+            <span style="font-size:22px">&#127467;&#127479;</span>
+            <span class="lang-option-label">Fran&#231;ais</span>
+          </button>
+          <button class="lang-option selected" onclick="selectLang(this, '&#127468;&#127463; English')">
+            <span style="font-size:22px">&#127468;&#127463;</span>
+            <span class="lang-option-label">English</span>
+            <span class="checkmark">&#10003;</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="section-header">NOSTR RELAYS</div>
+      <div class="section">
+        <div class="relay-row"><span class="relay-text">wss://relay.damus.io</span></div>
+        <div class="row-sep"></div>
+        <div class="relay-row"><span class="relay-text">wss://nos.lol</span></div>
+        <div class="row-sep"></div>
+        <div class="relay-row"><span class="relay-text">wss://relay.nostr.band</span></div>
+      </div>
+
+      <div class="section-header">ABOUT JISR</div>
+      <div class="section">
+        <div class="setting-row">
+          <span class="setting-label">Version</span>
+          <span class="setting-value">0.1.0</span>
+        </div>
+        <div class="row-sep"></div>
+        <div class="about-text">Jisr (Bridge) is an offline-first mesh messaging app designed for Lebanon. It works without internet using Bluetooth, and bridges to Nostr when online.</div>
+      </div>
+
+      <div class="section danger-section">
+        <button class="danger-row" style="width:100%;border:none;background:none;font-family:inherit;cursor:pointer;" onclick="if(confirm('Are you sure you want to clear all data?')) showScreen('onboarding')">
+          <span class="danger-text">Clear All Data</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+  let hasContacts = false;
+
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+
+    // Show contacts when transitioning from onboarding or add-contact
+    if (name === 'contacts') {
+      // After onboarding, show sample contacts
+      const nameInput = document.getElementById('name-input');
+      if (nameInput && nameInput.value.trim()) {
+        hasContacts = true;
+        document.getElementById('qr-display-name').textContent = nameInput.value.trim();
+        document.getElementById('settings-name').textContent = nameInput.value.trim();
+      }
+      if (hasContacts) {
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('contacts-list').style.display = 'block';
+      }
+    }
+
+    // Reset add contact tabs
+    if (name === 'add-contact') {
+      switchAddTab('show');
+    }
+  }
+
+  function goToStep(step) {
+    document.querySelectorAll('.onboarding-step').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+    document.getElementById('step-' + step).classList.add('active');
+    document.getElementById('dot-' + step).classList.add('active');
+
+    if (step === 'keys') {
+      setTimeout(() => goToStep('ready'), 2000);
+    }
+  }
+
+  function switchAddTab(tab) {
+    const indicator = document.getElementById('tab-indicator');
+    const showTab = document.getElementById('tab-show');
+    const scanTab = document.getElementById('tab-scan');
+    const showContent = document.getElementById('tab-content-show');
+    const scanContent = document.getElementById('tab-content-scan');
+
+    if (tab === 'show') {
+      indicator.className = 'tab-indicator show';
+      showTab.classList.add('active');
+      scanTab.classList.remove('active');
+      showContent.style.display = '';
+      scanContent.style.display = 'none';
+    } else {
+      indicator.className = 'tab-indicator scan';
+      scanTab.classList.add('active');
+      showTab.classList.remove('active');
+      showContent.style.display = 'none';
+      scanContent.style.display = 'flex';
+    }
+  }
+
+  function toggleSendBtn() {
+    const input = document.getElementById('msg-input');
+    const btn = document.getElementById('send-btn');
+    btn.disabled = !input.value.trim();
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('msg-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const area = document.getElementById('messages-area');
+    const now = new Date();
+    const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble msg-sent';
+    bubble.innerHTML = text + '<div class="msg-time msg-time-sent">' + time + ' &check;</div>';
+    area.appendChild(bubble);
+    area.scrollTop = area.scrollHeight;
+
+    input.value = '';
+    toggleSendBtn();
+  }
+
+  function toggleLangPicker() {
+    const picker = document.getElementById('lang-picker');
+    picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function selectLang(el, label) {
+    document.querySelectorAll('.lang-option').forEach(o => {
+      o.classList.remove('selected');
+      const cm = o.querySelector('.checkmark');
+      if (cm) cm.remove();
+    });
+    el.classList.add('selected');
+    const check = document.createElement('span');
+    check.className = 'checkmark';
+    check.textContent = '&#10003;';
+    el.appendChild(check);
+    document.querySelector('#lang-toggle .setting-value').textContent = label;
+    toggleLangPicker();
+  }
+
+  // Allow Enter to send message
+  document.getElementById('msg-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+</script>
+
+</body>
+</html>

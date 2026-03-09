@@ -1,0 +1,62 @@
+{
+  "app_name": "جسر",
+  "onboarding": {
+    "welcome": "أهلاً بك في جسر",
+    "subtitle": "مراسلة بدون إنترنت للبنان",
+    "choose_language": "اختر لغتك",
+    "enter_name": "أدخل اسمك المعروض",
+    "name_placeholder": "اسمك",
+    "generating_keys": "جارٍ إنشاء مفاتيح التشفير...",
+    "ready": "أنت جاهز!",
+    "start": "ابدأ المراسلة"
+  },
+  "contacts": {
+    "title": "جهات الاتصال",
+    "no_contacts": "لا توجد جهات اتصال بعد",
+    "add_contact": "إضافة جهة اتصال",
+    "search": "البحث في جهات الاتصال..."
+  },
+  "chat": {
+    "placeholder": "اكتب رسالة...",
+    "send": "إرسال",
+    "delivered": "تم التوصيل",
+    "sent": "تم الإرسال",
+    "pending": "جارٍ الإرسال...",
+    "read": "مقروءة",
+    "encryption_notice": "الرسائل مشفّرة من طرف إلى طرف"
+  },
+  "add_contact": {
+    "title": "إضافة جهة اتصال",
+    "show_qr": "عرض رمز QR الخاص بي",
+    "scan_qr": "مسح رمز QR",
+    "scan_instruction": "امسح رمز QR الخاص بجهة اتصالك",
+    "contact_added": "تمت إضافة جهة الاتصال!",
+    "invalid_qr": "رمز QR غير صالح"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "display_name": "الاسم المعروض",
+    "language": "اللغة",
+    "public_key": "مفتاحك العام",
+    "nostr_relays": "مُرحّلات Nostr",
+    "clear_data": "مسح جميع البيانات",
+    "version": "الإصدار",
+    "about": "حول جسر",
+    "about_text": "جسر هو تطبيق مراسلة شبكي يعمل بدون إنترنت، مصمّم للبنان. يعمل عبر البلوتوث بدون اتصال بالإنترنت، ويتصل بشبكة Nostr عند توفّر الاتصال."
+  },
+  "connection": {
+    "direct": "مباشر",
+    "mesh": "شبكي",
+    "nostr": "Nostr",
+    "offline": "غير متصل",
+    "peers_nearby": "{{count}} أجهزة قريبة"
+  },
+  "common": {
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "confirm": "تأكيد",
+    "error": "خطأ",
+    "ok": "حسناً"
+  }
+}
